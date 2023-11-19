@@ -133,9 +133,11 @@ def sudoku(board):
         L.append(S)
         # foreach j in V(G) adyacent to a vertex i in S with i < j 
         # for this you can check the position for every vertex in S, and search in the board for the adjacent vertex (vertex with same i, j, or in the same quadrant)
-
-        # for i in range(len(board)):
-            # for j in range(len(board)):
+        for x in S:
+            for i in range(len(board)):
+                for j in range(len(board)):
+                    if i == x[0] or j == x[1] or ((i // 3) * 3 + (j // 3)) == x[2]:
+                        Sj = "???"
     return L
 
 # new_board = findMIS(board2)
