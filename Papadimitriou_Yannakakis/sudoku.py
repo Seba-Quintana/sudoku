@@ -1,4 +1,4 @@
-# sudoku solver with papadimitriou and yannakakis algorithm
+# sudoku solver with Papadimitriou and Yannakakis algorithm
 
 # import libraries
 import heapq
@@ -32,7 +32,9 @@ board2 = [
 
 # function to find the first maximal independent set in the board in lexical order
 def findMIS(original_board):
+    # this board is created only for testing purposes
     board = copy.deepcopy(original_board)
+
     MIS = []
     # create a list of quadrants
     # each list contains the values found in the quadrant
@@ -118,6 +120,19 @@ def print_board(board):
                 print(str(board[i][j]) + " ", end="")
     print("\n")
 
+def get_quadrant_cells(board, x):
+    # Get the starting row and column of the quadrant
+    start_row = (x[0] // 3) * 3
+    start_col = (x[1] // 3) * 3
+
+    # Traverse the cells in the same quadrant
+    quadrant_cells = []
+    for i in range(start_row, start_row + 3):
+        for j in range(start_col, start_col + 3):
+            quadrant_cells.append((i, j))
+
+    return quadrant_cells
+
 def sudoku(board):
     # find the first maximal independent set
     S_star = findMIS(board)
@@ -134,10 +149,16 @@ def sudoku(board):
         # foreach j in V(G) adyacent to a vertex i in S with i < j 
         # for this you can check the position for every vertex in S, and search in the board for the adjacent vertex (vertex with same i, j, or in the same quadrant)
         for x in S:
+            row = board[x[0]]
+            column = []
             for i in range(len(board)):
-                for j in range(len(board)):
-                    if i == x[0] or j == x[1] or ((i // 3) * 3 + (j // 3)) == x[2]:
-                        Sj = "???"
+                column.append(board[i][x[1]])
+            quadrant = []
+            quadrant_cells = get_quadrant_cells(board, x)
+            for cell in quadrant_cells:
+                cell_value = board[cell[0]][cell[1]]
+                quadrant.append(cell_value)
+            
     return L
 
 # new_board = findMIS(board2)
