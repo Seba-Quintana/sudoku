@@ -50,8 +50,6 @@ def findMIS(original_board):
     # search an initial value in the board 
     # values: i, j, quadrant, actualValue
     initial_value = [0, 0, 0, 0]
-    # once found an initial value, find all quadrants that contain the value
-    initial_value_quadrants = []
     # this is to avoid changing the initial value
     found_one = False
 
@@ -63,9 +61,7 @@ def findMIS(original_board):
                 found_one = True
                 # find initial's value quadrant
                 initial_value = [i, j, quadrant, board[i][j]]
-                # if quadrant not in initial_value_quadrants:
                 quadrants[i].append(initial_value[3])
-                #
                 MIS.append(initial_value)
                 continue
             # every time we find the value again, we update the quadrant list
@@ -73,9 +69,7 @@ def findMIS(original_board):
                 if board[i][j] == initial_value[3]:
                     MIS.append([i, j, quadrant, initial_value[3]])
                     # find initial's value quadrant
-                    # if quadrant not in initial_value_quadrants:
                     quadrants[i].append(initial_value[3])
-                    #
                 if board[i][j] == 0:
                     is_in_quadrant = False
                     is_in_row = False
