@@ -120,7 +120,7 @@ def print_board(board):
                 print(str(board[i][j]) + " ", end="")
     print("\n")
 
-def get_quadrant_cells(board, x):
+def get_quadrant_cells(x):
     # Get the starting row and column of the quadrant
     start_row = (x[0] // 3) * 3
     start_col = (x[1] // 3) * 3
@@ -154,11 +154,11 @@ def sudoku(board):
             for i in range(len(board)):
                 column.append(board[i][x[1]])
             quadrant = []
-            quadrant_cells = get_quadrant_cells(board, x)
+            quadrant_cells = get_quadrant_cells(x)
             for cell in quadrant_cells:
                 cell_value = board[cell[0]][cell[1]]
                 quadrant.append(cell_value)
-            
+
     return L
 
 # new_board = findMIS(board2)
