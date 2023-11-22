@@ -121,6 +121,16 @@ def print_board(board):
                 print(str(board[i][j]) + " ", end="")
     print("\n")
 
+def paint_board(board, MIS):
+    # traverse the MIS
+    for x in MIS:
+        x_row = x[0]
+        x_column = x[1]
+        x_value = x[3]
+        # put the value
+        board[x_row][x_column] = x_value
+    return board
+
 def get_quadrant_cells(board, x):
     # Get the starting row and column of the quadrant
     start_row = (x[0] // 3) * 3
@@ -154,6 +164,39 @@ def get_min_lex_vertex(vertex1, vertex2):
             # if they are both in the same row and column, they are the same vertex
             return True
 
+# return all adyacents of a vertex without changing the board
+def get_ady(board, x):
+    ady = []
+    row = copy.deepcopy(board[x[0]])
+    # get the position and quadrant of each element in the row
+    for i in range(len(row)):
+        row[i] = [x[0], i, (x[0] // 3) * 3 + (i // 3), row[i]]
+        if row[i] not in ady and row[i] != x:
+            ady.append(row[i])
+    column = []
+    for i in range(len(board)):
+        column.append(copy.deepcopy(board[i][x[1]]))
+    # get the position and quadrant of each element in the column
+    for i in range(len(column)):
+        column[i] = [i, x[1], (i // 3) * 3 + (x[1] // 3), column[i]]
+        if column[i] not in ady and column[i] != x:
+            ady.append(column[i])
+    quadrant = []
+    quadrant_cells = get_quadrant_cells(copy.deepcopy(board), x)
+    for cell in quadrant_cells:
+        quadrant.append(cell)
+        if cell not in ady and cell != x:
+            ady.append(cell)
+    return ady
+
+def is_MIS(board, S):
+    for x in S:
+        ady = get_ady(board, x)
+        for elem in ady:
+            if elem in S:
+                return False
+    return True
+
 def sudoku(board):
     # find the first maximal independent set
     S_star = findMIS(board)
@@ -176,27 +219,7 @@ def sudoku(board):
         # in Papadimitriou's paper, x is vertex i
         # this for is to find all the neighbours of S's vertex
         for x in S:
-            ady = []
-            row = copy.deepcopy(board[x[0]])
-            # get the position and quadrant of each element in the row
-            for i in range(len(row)):
-                row[i] = [x[0], i, (x[0] // 3) * 3 + (i // 3), row[i]]
-                if row[i] not in ady:
-                    ady.append(row[i])
-            column = []
-            for i in range(len(board)):
-                column.append(copy.deepcopy(board[i][x[1]]))
-            # get the position and quadrant of each element in the column
-            for i in range(len(column)):
-                column[i] = [i, x[1], (i // 3) * 3 + (x[1] // 3), column[i]]
-                if column[i] not in ady:
-                    ady.append(column[i])
-            quadrant = []
-            quadrant_cells = get_quadrant_cells(copy.deepcopy(board), x)
-            for cell in quadrant_cells:
-                quadrant.append(cell)
-                if cell not in ady:
-                    ady.append(cell)
+            ady = get_ady(board, x)
             # add all elements in the row, column and quadrant to J
             J = []
             for elem in ady:
@@ -208,7 +231,15 @@ def sudoku(board):
                 for elem in S:
                     if get_min_lex_vertex(elem, j):
                         Sj.append(elem)
-                print("Sj:", Sj)
+                j_ady = get_ady(board, j)
+                possible_MIS = []
+                possible_MIS.append(j)
+                for elem in j_ady:
+                    if elem not in Sj:
+                        possible_MIS.append(elem)
+                if is_MIS(board, possible_MIS):
+                    heapq.heappush(Q, possible_MIS)
+
 
 
         # # for each vertex j adjacent to a vertex in S
@@ -245,7 +276,18 @@ def sudoku(board):
 
     return L
 
-# new_board = findMIS(board2)
+def test():
+    MIS = findMIS(board2)
+    print(MIS)
+    paint_board(board2, MIS)
+    print_board(board2)
+    print(is_MIS(board2, MIS))
+
+# test()
+
 a = sudoku(board1)
-# print_board(new_board)
+print(a)
+
+
+
 
