@@ -135,6 +135,25 @@ def get_quadrant_cells(board, x):
 
     return quadrant_cells
 
+# return true if vertex1 is less than vertex2 in lexical order
+def get_min_lex_vertex(vertex1, vertex2):
+    # if vertex1 is in a previous row than vertex2
+    if vertex1[0] < vertex2[0]:
+        return True
+    # if vertex2 is in a previous row than vertex1
+    elif vertex1[0] > vertex2[0]:
+        return False
+    else:
+        # if both vertex are in the same row, but vertex1 is in a previous column than vertex2
+        if vertex1[1] < vertex2[1]:
+            return True
+        # if both vertex are in the same row, but vertex2 is in a previous column than vertex1
+        elif vertex1[1] > vertex2[1]:
+            return False
+        else:
+            # if they are both in the same row and column, they are the same vertex
+            return True
+
 def sudoku(board):
     # find the first maximal independent set
     S_star = findMIS(board)
@@ -154,36 +173,76 @@ def sudoku(board):
 
         # k's idea is to store all vertex in S
         k = copy.deepcopy(S)
+        # in Papadimitriou's paper, x is vertex i
+        # this for is to find all the neighbours of S's vertex
         for x in S:
-            row = board[x[0]]
+            ady = []
+            row = copy.deepcopy(board[x[0]])
+            # get the position and quadrant of each element in the row
+            for i in range(len(row)):
+                row[i] = [x[0], i, (x[0] // 3) * 3 + (i // 3), row[i]]
+                if row[i] not in ady:
+                    ady.append(row[i])
             column = []
             for i in range(len(board)):
-                column.append(board[i][x[1]])
+                column.append(copy.deepcopy(board[i][x[1]]))
+            # get the position and quadrant of each element in the column
+            for i in range(len(column)):
+                column[i] = [i, x[1], (i // 3) * 3 + (x[1] // 3), column[i]]
+                if column[i] not in ady:
+                    ady.append(column[i])
             quadrant = []
-            quadrant_cells = get_quadrant_cells(board, x)
+            quadrant_cells = get_quadrant_cells(copy.deepcopy(board), x)
             for cell in quadrant_cells:
                 quadrant.append(cell)
+                if cell not in ady:
+                    ady.append(cell)
+            # add all elements in the row, column and quadrant to J
+            J = []
+            for elem in ady:
+                if get_min_lex_vertex(x, elem) and elem not in S:
+                    J.append(elem)
+            
+            for j in J:
+                Sj = []
+                for elem in S:
+                    if get_min_lex_vertex(elem, j):
+                        Sj.append(elem)
+                print("Sj:", Sj)
 
-            # search for the adjacent vertex
-            Sj = []
-            # j has all adjacent vertex to x
-            j = []
-            actual_row = 0
-            # grab all rows before x[0]
-            while actual_row < x[0]:
-                actual_column = 0
-                for elem in board[actual_row]:
-                    j.append([actual_row, actual_column, (actual_row // 3) * 3 + (actual_column // 3), elem])
-                    actual_column = actual_column + 1
-                actual_row += 1
-            # grab all elements in the same row as x until x[1]
-            actual_column = 0
-            while actual_column <= x[1]:
-                for elem in row:
-                    j.append([x[0], actual_column, x[2], elem])
-                actual_column += 1
-            # grab elements that are in S and j at the same time in Sj
-            # if (Sj - neighbours of j) U {j}
+
+        # # for each vertex j adjacent to a vertex in S
+        # for j in ady:
+        #     Sj = []
+        #     i_j = []
+        #     # grab all rows before j[0]
+        #     actual_row = 0
+        #     while actual_row < j[0]:
+        #         row = copy.deepcopy(board[actual_row])
+        #         actual_column = 0
+        #         for elem in row:
+        #             i_j.append([actual_row, actual_column, (actual_row // 3) * 3 + (actual_column // 3), elem])
+        #             actual_column = actual_column + 1
+        #         actual_row += 1
+        #     # grab all elements in the same row as j until j[1]
+        #     actual_column = 0
+        #     while actual_column <= j[1]:
+        #         row = copy.deepcopy(board[j[0]])
+        #         for elem in row:
+        #             i_j.append([j[0], actual_column, j[2], elem])
+        #         actual_column += 1
+        #     # grab elements that are in S and {1,..,j} at the same time in Sj
+        #     for elem in i_j:
+        #         if elem in S:
+        #             Sj.append(elem)
+        #     # if (Sj - neighbours of j) U {j}
+        #     res = []
+        #     res.append(j)
+        #     for elem in Sj:
+        #         a=0
+        #
+
+
     return L
 
 # new_board = findMIS(board2)
