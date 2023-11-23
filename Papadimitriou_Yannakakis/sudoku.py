@@ -217,6 +217,7 @@ def is_MIS(original_board, possible_S, j):
             if i == j_row and j == j_column:
                 break
             elem = [i, j, (i // 3) * 3 + (j // 3), board[i][j]]
+            paint_board(board, possible_S)
             is_possible = possible(i, j, possible_S[1][3], board)
             if is_possible and elem[3] == 0:
                 return False
@@ -262,7 +263,7 @@ def sudoku(board):
                     if elem not in j_ady:
                         possible_MIS.append(elem)
                 if is_MIS(board, possible_MIS, j):
-
+                    TODO
                     heapq.heappush(Q, possible_MIS)
 
     return L
