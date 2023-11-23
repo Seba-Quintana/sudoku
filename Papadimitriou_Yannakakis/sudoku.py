@@ -189,13 +189,42 @@ def get_ady(board, x):
             ady.append(cell)
     return ady
 
-def is_MIS(board, S):
-    for x in S:
+def possible(y,x,n,grid):
+    for i in range(0,9):
+        if(grid[y][i] == n or grid[i][x] == n):
+            return False
+    x0 = (x//3)*3
+    y0 = (y//3)*3
+    for i in range(0,3):
+        for j in range(0,3):
+            if grid[y0+i][x0+j] == n:
+                return False
+    if grid[y][x] != 0:
+        return False
+    return True
+
+def is_MIS(original_board, possible_S, j):
+    board = copy.deepcopy(original_board)
+    for x in possible_S:
         ady = get_ady(board, x)
         for elem in ady:
-            if elem in S:
+            if elem in possible_S:
                 return False
+    j_row = j[0]
+    j_column = j[1]
+    for i in range(len(board)):
+        for j in range(len(board)):
+            if i == j_row and j == j_column:
+                break
+            elem = [i, j, (i // 3) * 3 + (j // 3), board[i][j]]
+            is_possible = possible(i, j, possible_S[1][3], board)
+            if is_possible and elem[3] == 0:
+                return False
+        if i == j_row and j == j_column:
+            break
     return True
+
+
 
 def sudoku(board):
     # find the first maximal independent set
@@ -211,11 +240,6 @@ def sudoku(board):
         S = heapq.heappop(Q)
         # add the element to the list 
         L.append(S)
-        # foreach j in V(G) adyacent to a vertex i in S with i < j 
-        # for this you can check the position for every vertex in S, and search in the board for the adjacent vertex (vertex with same i, j, or in the same quadrant)
-
-        # k's idea is to store all vertex in S
-        k = copy.deepcopy(S)
         # in Papadimitriou's paper, x is vertex i
         # this for is to find all the neighbours of S's vertex
         for x in S:
@@ -234,59 +258,27 @@ def sudoku(board):
                 j_ady = get_ady(board, j)
                 possible_MIS = []
                 possible_MIS.append(j)
-                for elem in j_ady:
-                    if elem not in Sj:
+                for elem in Sj:
+                    if elem not in j_ady:
                         possible_MIS.append(elem)
-                if is_MIS(board, possible_MIS):
+                if is_MIS(board, possible_MIS, j):
+
                     heapq.heappush(Q, possible_MIS)
-
-
-
-        # # for each vertex j adjacent to a vertex in S
-        # for j in ady:
-        #     Sj = []
-        #     i_j = []
-        #     # grab all rows before j[0]
-        #     actual_row = 0
-        #     while actual_row < j[0]:
-        #         row = copy.deepcopy(board[actual_row])
-        #         actual_column = 0
-        #         for elem in row:
-        #             i_j.append([actual_row, actual_column, (actual_row // 3) * 3 + (actual_column // 3), elem])
-        #             actual_column = actual_column + 1
-        #         actual_row += 1
-        #     # grab all elements in the same row as j until j[1]
-        #     actual_column = 0
-        #     while actual_column <= j[1]:
-        #         row = copy.deepcopy(board[j[0]])
-        #         for elem in row:
-        #             i_j.append([j[0], actual_column, j[2], elem])
-        #         actual_column += 1
-        #     # grab elements that are in S and {1,..,j} at the same time in Sj
-        #     for elem in i_j:
-        #         if elem in S:
-        #             Sj.append(elem)
-        #     # if (Sj - neighbours of j) U {j}
-        #     res = []
-        #     res.append(j)
-        #     for elem in Sj:
-        #         a=0
-        #
-
 
     return L
 
 def test():
-    MIS = findMIS(board2)
-    print(MIS)
-    paint_board(board2, MIS)
+    a = [[0,1,0,1],[1,4,1,1]]
+    j = [2,6,2,5]
     print_board(board2)
-    print(is_MIS(board2, MIS))
+    print(is_MIS(board2, a, j))
 
-# test()
 
-a = sudoku(board1)
-print(a)
+
+test()
+
+# a = sudoku(board1)
+# print(a)
 
 
 
