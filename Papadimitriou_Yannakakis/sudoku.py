@@ -103,6 +103,73 @@ def findMIS(original_board):
     # print_board(board)
     return MIS
 
+def findMIS_containing_possible_MIS(original_board, possible_MIS):
+    # this board is created only for testing purposes
+    board = copy.deepcopy(original_board)
+
+    MIS = []
+    # create a list of quadrants
+    # each list contains the values found in the quadrant
+    quadrants = [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+    ]
+
+    # search an initial value in the board 
+    # values: i, j, quadrant, actualValue
+    initial_value = [0, 0, 0, 0]
+    for x in possible_MIS:
+        MIS.append(x)
+        quadrants[x[2]].append(x[3])
+        if get_min_lex_vertex(x, initial_value):
+            initial_value = x
+    paint_board(board, MIS)
+
+    for i in range(len(board)):
+        for j in range(len(board)):
+            quadrant = (i // 3) * 3 + (j // 3)
+            if board[i][j] == initial_value[3] and [i, j, quadrant, initial_value[3]] not in MIS:
+                MIS.append([i, j, quadrant, initial_value[3]])
+                quadrants[i].append(initial_value[3])
+            if board[i][j] == 0:
+                is_in_quadrant = False
+                is_in_row = False
+                is_in_column = False
+
+                # check if the actual position's quadrant contains the value
+                quadrant = (i // 3) * 3 + (j // 3)
+                if initial_value[3] in quadrants[quadrant]:
+                    is_in_quadrant = True
+                
+                # check if the actual position's row contains the value
+                if initial_value[3] in board[i]:
+                    is_in_row = True
+
+                # check if the actual position's column contains the value
+                for k in range(len(board)):
+                    if initial_value[3] == board[k][j]:
+                        is_in_column = True
+
+                if is_in_quadrant or is_in_row or is_in_column:
+                    continue
+                
+                # if the value is neither in the quadrant nor in the row nor in the column
+                # add it to the MIS
+                MIS.append([i, j, quadrant, initial_value[3]])
+                # board is for testing purposes
+                board[i][j] = initial_value[3]
+                # update quadrant
+                quadrants[quadrant].append(initial_value[3])
+        continue
+    return MIS
+
 def print_board(board):
     # traverse the print_board
     for i in range(len(board)):
@@ -218,7 +285,7 @@ def is_MIS(original_board, possible_S, j):
                 break
             elem = [i, j, (i // 3) * 3 + (j // 3), board[i][j]]
             paint_board(board, possible_S)
-            is_possible = possible(i, j, possible_S[1][3], board)
+            is_possible = possible(i, j, possible_S[0][3], board)
             if is_possible and elem[3] == 0:
                 return False
         if i == j_row and j == j_column:
@@ -263,23 +330,27 @@ def sudoku(board):
                     if elem not in j_ady:
                         possible_MIS.append(elem)
                 if is_MIS(board, possible_MIS, j):
-                    TODO
-                    heapq.heappush(Q, possible_MIS)
-
+                    T = findMIS_containing_possible_MIS(board, possible_MIS)
+                    heapq.heappush(Q, T)
     return L
 
 def test():
-    a = [[0,1,0,1],[1,4,1,1]]
-    j = [2,6,2,5]
+    # a = [[0,1,0,1],[1,4,1,1]]
+    # j = [2,6,2,5]
+    # print_board(board2)
+    # print(is_MIS(board2, a, j))
+    a = [[0,0,0,5], [1,3,1,5], [2,6,2,5]]
+    b = findMIS_containing_possible_MIS(board2, a)
+    print(a)
     print_board(board2)
-    print(is_MIS(board2, a, j))
+    print(b)
 
 
 
-test()
+# test()
 
-# a = sudoku(board1)
-# print(a)
+a = sudoku(board1)
+print(a)
 
 
 
