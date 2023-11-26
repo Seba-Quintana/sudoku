@@ -6,15 +6,15 @@ import copy
 
 # sudoku example board
 board1 = [
-    [0, 4, 0, 0, 0, 0, 0, 8, 0],
-    [0, 0, 7, 0, 0, 0, 0, 6, 0],
-    [0, 0, 0, 0, 1, 0, 0, 0, 0],
-    [4, 1, 0, 0, 0, 0, 2, 0, 0],
-    [0, 0, 0, 0, 0, 5, 0, 0, 0],
-    [0, 3, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 6, 0, 0, 7, 0, 0, 3],
-    [0, 0, 5, 8, 0, 6, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [0, 0, 0, 0, 8, 9, 5, 0, 0],
+    [0, 0, 1, 2, 0, 0, 0, 0, 4],
+    [7, 0, 0, 0, 0, 0, 2, 3, 0],
+    [2, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 4, 5, 1, 0, 7, 6, 8, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 5],
+    [0, 7, 8, 0, 0, 0, 0, 0, 6],
+    [5, 0, 0, 0, 0, 3, 4, 0, 0],
+    [0, 0, 9, 6, 4, 0, 0, 0, 0],
 ]
 
 # test board
@@ -63,13 +63,13 @@ def findMIS(original_board):
             if board[i][j] != 0 and not found_one:
                 found_one = True
                 initial_value = [i, j, quadrant, board[i][j]]
-                quadrants[i].append(initial_value[3])
+                quadrants[quadrant].append(initial_value[3])
                 MIS.append(initial_value)
                 continue
             if found_one:
                 if board[i][j] == initial_value[3]:
                     MIS.append([i, j, quadrant, initial_value[3]])
-                    quadrants[i].append(initial_value[3])
+                    quadrants[quadrant].append(initial_value[3])
                 if board[i][j] == 0:
                     is_in_quadrant = False
                     is_in_row = False
@@ -100,7 +100,7 @@ def findMIS(original_board):
                     # update quadrant
                     quadrants[quadrant].append(initial_value[3])
         continue
-    # print_board(board)
+    print_board(board)
     return MIS
 
 def findMIS_containing_possible_MIS(original_board, possible_MIS):
@@ -124,7 +124,7 @@ def findMIS_containing_possible_MIS(original_board, possible_MIS):
 
     # search an initial value in the board 
     # values: i, j, quadrant, actualValue
-    initial_value = [0, 0, 0, 0]
+    initial_value = possible_MIS[0]
     for x in possible_MIS:
         MIS.append(x)
         quadrants[x[2]].append(x[3])
@@ -231,6 +231,20 @@ def get_min_lex_vertex(vertex1, vertex2):
             # if they are both in the same row and column, they are the same vertex
             return True
 
+def sortLex(C):
+    n = len(C)
+    
+    for i in range(n - 1):
+        # Encuentra el índice del mínimo elemento en el resto del conjunto
+        indice_minimo = i
+        for j in range(i + 1, n):
+            if get_min_lex_vertex(C[j], C[indice_minimo]):
+                indice_minimo = j
+
+        # Intercambia el elemento mínimo con el elemento en la posición actual
+        C[i], C[indice_minimo] = C[indice_minimo], C[i]
+    return C
+
 # return all adyacents of a vertex without changing the board
 def get_ady(board, x):
     ady = []
@@ -238,21 +252,23 @@ def get_ady(board, x):
     # get the position and quadrant of each element in the row
     for i in range(len(row)):
         row[i] = [x[0], i, (x[0] // 3) * 3 + (i // 3), row[i]]
-        if row[i] not in ady and row[i] != x:
-            ady.append(row[i])
+    for i in row:    
+        if i not in ady and i != x and i[3] != 0:
+            ady.append(i)
     column = []
     for i in range(len(board)):
         column.append(copy.deepcopy(board[i][x[1]]))
     # get the position and quadrant of each element in the column
     for i in range(len(column)):
         column[i] = [i, x[1], (i // 3) * 3 + (x[1] // 3), column[i]]
-        if column[i] not in ady and column[i] != x:
-            ady.append(column[i])
+    for j in column:
+        if j not in ady and j != x and j[3] != 0:
+            ady.append(j)
     quadrant = []
     quadrant_cells = get_quadrant_cells(copy.deepcopy(board), x)
     for cell in quadrant_cells:
         quadrant.append(cell)
-        if cell not in ady and cell != x:
+        if cell not in ady and cell != x and cell[3] != 0:
             ady.append(cell)
     return ady
 
@@ -273,6 +289,8 @@ def possible(y,x,n,grid):
 def is_MIS(original_board, possible_S, j):
     board = copy.deepcopy(original_board)
     for x in possible_S:
+        if j[3] != x[3]:
+            return False
         ady = get_ady(board, x)
         for elem in ady:
             if elem in possible_S:
@@ -325,13 +343,17 @@ def sudoku(board):
                         Sj.append(elem)
                 j_ady = get_ady(board, j)
                 possible_MIS = []
-                possible_MIS.append(j)
                 for elem in Sj:
                     if elem not in j_ady:
                         possible_MIS.append(elem)
+                possible_MIS.append(j)
                 if is_MIS(board, possible_MIS, j):
                     T = findMIS_containing_possible_MIS(board, possible_MIS)
-                    heapq.heappush(Q, T)
+                    T = sortLex(T)
+                    if T not in L and T not in Q:
+                        print(T)
+                        print("separa")
+                        heapq.heappush(Q, T)
     return L
 
 def test():
@@ -351,6 +373,7 @@ def test():
 
 a = sudoku(board1)
 print(a)
+print_board(board1)
 
 
 
