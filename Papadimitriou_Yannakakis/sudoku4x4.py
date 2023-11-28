@@ -2,54 +2,32 @@ import heapq
 import copy
 import numpy as np
 
-grid1 = [
-    [0, 0, 0, 0, 8, 9, 5, 0, 0],
-    [0, 0, 1, 2, 0, 0, 0, 0, 4],
-    [7, 0, 0, 0, 0, 0, 2, 3, 0],
-    [2, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 4, 5, 1, 0, 7, 6, 8, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 5],
-    [0, 7, 8, 0, 0, 0, 0, 0, 6],
-    [5, 0, 0, 0, 0, 3, 4, 0, 0],
-    [0, 0, 9, 6, 4, 0, 0, 0, 0],
+
+grid4 = [
+    [0,0,0,0],
+    [0,0,0,0],
+    [0,0,0,0],
+    [0,0,0,0],
 ]
 
-grid = [
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-]
 
-def print_board(board):
-    # traverse the print_board
-    for i in range(len(board)):
-        # print a line every 3 rows
-        if i % 3 == 0 and i != 0:
-            print("-----------------------")
-        # traverse the columns
-        for j in range(len(board)):
-            # print a line every 3 columns
-            if j % 3 == 0 and j != 0:
-                print(" | ", end="")
-            # print the value of the board
-            if j == 8:
-                print(board[i][j])
-            else:
-                print(str(board[i][j]) + " ", end="")
-    print("\n")
-
-
+def getQuadrant(x,y):
+    if 0 <= x <= 1 and 0 <= y <= 1:
+        return 0
+    elif 0 <= x <= 1 and 2 <= y <= 3:
+        return 1
+    elif 2 <= x <= 3 and 0 <= y <= 1:
+        return 2
+    elif 2 <= x <= 3 and 2 <= y <= 3:
+        return 3
+    else:
+        return "Fuera de rango"
+    
 def get_ady(grid, i):
     ADY = []
     for x in range(len(grid)):
         for y in range(len(grid)):
-            quadrant = (x // 3) * 3 + (y // 3)
+            quadrant = getQuadrant(x,y)
             if(i[0] == x or i[1] == y or i[2] == quadrant) and ([x,y,quadrant,grid[x][y]] not in ADY): #and grid[x][y] == 0: 
                 ADY.append([x,y,quadrant,grid[x][y]])
     if i in ADY:
@@ -87,7 +65,7 @@ def is_MIS(possible_MIS, grid, j):
                 break
             i = 0
             for elem in possible_MIS:
-                quadrant = (x // 3) * 3 + (y // 3)
+                quadrant = getQuadrant(x,y)
                 if elem[0] == x or elem[1] == y or elem[2] == quadrant:
                     i = i + 1
             if i == 0:
@@ -100,7 +78,7 @@ def is_MIS(possible_MIS, grid, j):
 def findMIS_WithPossibleMIS(possible_MIS, grid):
     for x in range(len(grid)):
         for y in range(len(grid)):
-            quadrant = (x // 3) * 3 + (y // 3)
+            quadrant = getQuadrant(x,y)
             i = 0
             for elem in possible_MIS:
                 if (elem[0] == x or elem[1] == y or elem[2] == quadrant):
@@ -111,8 +89,7 @@ def findMIS_WithPossibleMIS(possible_MIS, grid):
 
 
 def sudoku(grid):
-    #S_x = findMIS(grid)
-    S_x = [[0,0,0,0],[1,3,1,0],[2,6,2,0],[3,1,3,0],[4,4,4,0],[5,7,5,0],[6,2,6,0],[7,5,7,0],[8,8,8,0]]
+    S_x = [[0,0,0,0],[1,2,1,0],[2,1,2,0],[3,3,3,0]]
     Q = []
     heapq.heappush(Q, S_x)
     L = []
@@ -135,9 +112,9 @@ def sudoku(grid):
                 for i in S:
                     if(get_min_lex_vertex(i,j)):
                         S_j.append(i)
-                
-                R_j = get_ady(grid, j)
 
+                R_j = get_ady(grid, j)
+                
                 # S_j / R_j U j
                 possibleMIS = [x for x in S_j if x not in R_j]
                 possibleMIS.append(j)
@@ -153,5 +130,4 @@ def sudoku(grid):
     return L
                     
                 
-sudoku(grid)
-
+sudoku(grid4)
